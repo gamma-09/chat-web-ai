@@ -1,0 +1,120 @@
+body {
+    font-family: sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f0f0f0;
+}
+
+.chat-container {
+    width: 80%; /* O el ancho que prefieras */
+    /*max-width: 600px; /* Ancho máximo opcional */
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    overflow: hidden; /* Para que las esquinas redondeadas se vean bien */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    height: 80vh; /* Ajusta la altura como prefieras */
+
+}
+
+.chat-messages {
+    flex-grow: 1; /* Ocupa todo el espacio disponible */
+    overflow-y: auto; /* Barra de desplazamiento si hay muchos mensajes */
+    padding: 10px;
+    display: flex;
+    flex-direction: column-reverse; /* Mensajes más recientes abajo */
+
+}
+
+.message {
+    white-space: pre-line;
+    margin: 5px 0;
+    padding: 8px 12px;
+    border-radius: 15px;
+    max-width: 70%; /* Evita que los mensajes sean demasiado anchos */
+    word-wrap: break-word; /* Rompe palabras largas si es necesario */
+}
+
+.user-message {
+    white-space: pre-line;
+    background-color: #dcf8c6; /* Color para mensajes del usuario */
+    align-self: flex-end; /* Alinea a la derecha */
+}
+
+.ia-message {
+    white-space: pre-line;
+    background-color: #fff; /* Color para mensajes de la IA */
+    align-self: flex-start; /* Alinea a la izquierda */
+}
+.chat-input{
+    display: flex;
+    border-top: 1px solid #ccc;
+    padding-top: 5px;
+}
+
+#message-input {
+    flex-grow: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 20px;
+    resize: none; /* Evita que el usuario cambie el tamaño del textarea */
+    font-size: 16px;
+}
+
+#send-button {
+    background-color: #4CAF50;
+    border: none;
+    padding: 0;
+    margin-left: 5px;
+    border-radius: 50%;  /*Botón circular */
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    display: flex; /* Centra el icono SVG */
+    justify-content: center;
+    align-items: center;
+
+}
+
+#send-button svg {
+    fill: white; /* Color del icono */
+    width: 20px; /* Tamaño del icono */
+    height: 20px;
+
+}
+#send-button:disabled{
+    background-color: #cccccc;
+    cursor: not-allowed;
+
+}
+#send-button:disabled svg{
+        fill: #999999
+}
+
+/* ... (resto de tu style.css) ... */
+
+.message {
+    /* Añade estas líneas para la transición */
+    opacity: 0; /* Inicialmente oculto */
+    height: 0;  /* Altura inicial 0 */
+    padding-top: 0;     /*  Quita el padding superior e inferior inicialmente  */
+    padding-bottom: 0;
+    margin-top: 0;      /*  Quita los márgenes inicialmente  */
+    margin-bottom: 0;
+    transition: opacity 0.3s ease, height 0.3s ease, padding 0.3s ease, margin 0.3s ease; /* Transición suave */
+}
+
+/* Clase para activar la animación */
+.message.show {
+    opacity: 1; /*  Visible al agregar la clase 'show' */
+    height: auto; /* Altura automática (la altura natural del contenido) */
+    padding-top: 8px;    /*  Restaura el padding */
+    padding-bottom: 8px;
+    margin-top: 5px;     /*  Restaura los márgenes  */
+    margin-bottom: 5px;
+}
