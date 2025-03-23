@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat con IA</title>
+    <style>
+        body {
+    font-family: sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f0f0f0;
+}
+
+.chat-container {
+    width: 80%; /* O el ancho que prefieras */
+    /*max-width: 600px; /* Ancho máximo opcional */
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    overflow: hidden; /* Para que las esquinas redondeadas se vean bien */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    height: 80vh; /* Ajusta la altura como prefieras */
+
+}
+
+.chat-messages {
+    flex-grow: 1; /* Ocupa todo el espacio disponible */
+    overflow-y: auto; /* Barra de desplazamiento si hay muchos mensajes */
+    padding: 10px;
+    display: flex;
+    flex-direction: column-reverse; /* Mensajes más recientes abajo */
+
+}
+
+.message {
+    white-space: pre-line;
+    margin: 5px 0;
+    padding: 8px 12px;
+    border-radius: 15px;
+    max-width: 70%; /* Evita que los mensajes sean demasiado anchos */
+    word-wrap: break-word; /* Rompe palabras largas si es necesario */
+}
+
+.user-message {
+    white-space: pre-line;
+    background-color: #dcf8c6; /* Color para mensajes del usuario */
+    align-self: flex-end; /* Alinea a la derecha */
+}
+
+.ia-message {
+    white-space: pre-line;
+    background-color: #fff; /* Color para mensajes de la IA */
+    align-self: flex-start; /* Alinea a la izquierda */
+}
+.chat-input{
+    display: flex;
+    border-top: 1px solid #ccc;
+    padding-top: 5px;
+}
+
+#message-input {
+    flex-grow: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 20px;
+    resize: none; /* Evita que el usuario cambie el tamaño del textarea */
+    font-size: 16px;
+}
+
+#send-button {
+    background-color: #4CAF50;
+    border: none;
+    padding: 0;
+    margin-left: 5px;
+    border-radius: 50%;  /*Botón circular */
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    display: flex; /* Centra el icono SVG */
+    justify-content: center;
+    align-items: center;
+
+}
+
+#send-button svg {
+    fill: white; /* Color del icono */
+    width: 20px; /* Tamaño del icono */
+    height: 20px;
+
+}
+#send-button:disabled{
+    background-color: #cccccc;
+    cursor: not-allowed;
+
+}
+#send-button:disabled svg{
+        fill: #999999
+}
+
+/* ... (resto de tu style.css) ... */
+
+.message {
+    /* Añade estas líneas para la transición */
+    opacity: 0; /* Inicialmente oculto */
+    height: 0;  /* Altura inicial 0 */
+    padding-top: 0;     /*  Quita el padding superior e inferior inicialmente  */
+    padding-bottom: 0;
+    margin-top: 0;      /*  Quita los márgenes inicialmente  */
+    margin-bottom: 0;
+    transition: opacity 0.3s ease, height 0.3s ease, padding 0.3s ease, margin 0.3s ease; /* Transición suave */
+}
+
+/* Clase para activar la animación */
+.message.show {
+    opacity: 1; /*  Visible al agregar la clase 'show' */
+    height: auto; /* Altura automática (la altura natural del contenido) */
+    padding-top: 8px;    /*  Restaura el padding */
+    padding-bottom: 8px;
+    margin-top: 5px;     /*  Restaura los márgenes  */
+    margin-bottom: 5px;
+}
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-messages" id="chat-messages">
+            </div>
+        <div class="chat-input">
+            <textarea id="message-input" placeholder="Escribe tu mensaje..."></textarea>
+            <button id="send-button">
+                <svg viewBox="0 0 24 24">  <!-- Icono de triángulo (enviar) -->
+                    <path d="M2,21L23,12L2,3V10L17,12L2,14V21Z"></path>
+                </svg>
+            </button>
+        </div>
+    </div>
+    <script>
+        const messageInput = document.getElementById('message-input');
+const sendButton = document.getElementById('send-button');
+const chatMessages = document.getElementById('chat-messages');
+const API_KEY = "AIzaSyD0uBeb0tnuMQNlYmkkxOBkBlTs6_ai_6I";
+
+async function getIAResponse() {
+    const mensaje = messageInput.value;
+    messageInput.value = ""; // Limpiar el input
+    try {
+        const respuesta = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + API_KEY, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                contents: [{ parts: [{ text: mensaje }] }],
+            }),
+        });
+        const datos = await respuesta.json();
+        const textoRespuesta = datos.candidates[0].content.parts[0].text;
+        return textoRespuesta;
+    } catch (error) {
+        console.error("Error:", error);
+        return `Mensaje del usuario: ${mensaje}\nError: No se pudo obtener la respuesta.`;
+    }
+
+}
+
+function addMessage(message, isUser) {
+    const messageDiv = document.createElement('div');
+    messageDiv.classList.add('message', isUser ? 'user-message' : 'ia-message');
+    messageDiv.textContent = message;
+    chatMessages.prepend(messageDiv); //  <--  CAMBIO:  Usamos append
+
+    setTimeout(() => {
+        messageDiv.classList.add('show');
+        // Scroll al final (ya no necesitamos cálculos complicados)
+        chatMessages.scrollTop = chatMessages.scrollHeight; // <-- SIMPLIFICADO
+    }, 0);
+}
+
+async function sendMessage() {
+    const message = messageInput.value.trim();
+    if (!message) return;
+
+    addMessage(message, true);
+
+    try {
+        const iaResponse = await getIAResponse();
+        messageInput.value = '';
+        messageInput.disabled = true;
+        sendButton.disabled = true;
+        addMessage(iaResponse, false);
+    } catch (error) {
+        addMessage("Error al obtener la respuesta.", false);
+    } finally {
+        messageInput.disabled = false;
+        sendButton.disabled = false;
+        messageInput.focus();
+    }
+}
+
+sendButton.addEventListener('click', sendMessage);
+
+messageInput.addEventListener('keydown', (event) => {
+    if (event.ctrlKey && event.key === 'Enter') {
+        event.preventDefault();
+        sendMessage();
+    }
+});
+/*
+messageInput.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" && !event.ctrlKey) {
+        messageInput.
+    }
+});*/
+    </script>
+</body>
+</html>
